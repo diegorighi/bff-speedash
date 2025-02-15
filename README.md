@@ -116,5 +116,47 @@ Os testes incluem:
 - **Testes com Mockito**: Mocking para cenários específicos.
 - **Testes GraphQL**: Validação de schemas e consultas GraphQL
 
+## Estrutua do projeto
+
+bff-speedash/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── br/
+│   │   │       └── com/
+│   │   │           └── drighi/
+│   │   │               └── bffspeedash/
+│   │   │                   ├── application/
+│   │   │                   │   ├── service/                        (classes auxiliares para o facade)
+│   │   │                   │   ├── usecase/                        (casos de uso dos domínios)
+│   │   │                   │   └── facade/                         (orquestrador entre domínio e adapters) 
+│   │   │                   ├── domain/                             
+│   │   │                   │   ├── model/                          (modelos: Cliente, Conta, Pagamento, Veículos, Tags etc)
+│   │   │                   │   └── port/                           (comunicadores com o mundo externo)
+│   │   │                   │       ├── input/                      (portas de entrada: Server Authorization, Mobile, Web, APIs)
+│   │   │                   │       └── output/                     (portas de saída: Redis, OpenFeign, GraphQL etc)
+│   │   │                   ├── infrastructure/
+│   │   │                   │   ├── adapters/                       (implementações spring)
+│   │   │                   │   │   ├── http/                       (serviços http => GraphQL, OpenFeign)
+│   │   │                   │   │   └── repository/                 (serviços repo => REDIS, MongoDB etc)
+│   │   │                   │   ├── config/                         (configuração de Beans, ExceptionHandler etc)
+│   │   │                   │   └── security/                       (resource server authorization)
+│   │   │                   └── BffSpeedashApplication.java         (classe principal)
+│   │   └── resources/                         
+│   │       ├── application-dev.properties                          
+│   │       ├── application-hml.properties
+│   │       └── application-prod.properties
+│   └── test/
+│       └── java/
+│           └── br/
+│               └── com/
+│                   └── drighi/
+│                       └── bffspeedash/
+│                           └── application/
+│                               └── usecase/
+│                                   └── SeuUseCaseTest.java
+├── .gitignore
+├── pom.xml
+└── README.md
 
 
