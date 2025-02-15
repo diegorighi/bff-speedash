@@ -118,6 +118,7 @@ Os testes incluem:
 
 ## Estrutua do projeto
 
+```
 bff-speedash/
 ├── src/
 │   ├── main/
@@ -157,6 +158,6 @@ bff-speedash/
 │                                   └── SeuUseCaseTest.java
 ├── .gitignore
 ├── pom.xml
-└── README.md
+└── README.md´´´
 
 
