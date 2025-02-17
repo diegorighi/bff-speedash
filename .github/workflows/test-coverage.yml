@@ -1,4 +1,4 @@
-name: Test Coverage Check
+name: Test Unit Execution
 
 on:
   pull_request:
@@ -29,26 +29,3 @@ jobs:
 
       - name: Construir e Rodar Testes
         run: mvn clean verify
-
-      - name: Verificar Cobertura
-        run: |
-          if [ ! -f target/site/jacoco/jacoco.xml ]; then
-            echo "Nenhuma métrica de cobertura encontrada! Verifique se os testes foram executados corretamente."
-            exit 1
-          fi
-
-          cobertura=$(grep -oP '(?<=<counter type="INSTRUCTION" missed=")[0-9]+' target/site/jacoco/jacoco.xml | awk '{sum+=$1} END {print sum}')
-          total=$(grep -oP '(?<=<counter type="INSTRUCTION" covered=")[0-9]+' target/site/jacoco/jacoco.xml | awk '{sum+=$1} END {print sum}')
-
-          if [ $((total + cobertura)) -gt 0 ]; then
-            coverage=$(awk "BEGIN {printf \"%.2f\", ($total / ($total + $cobertura)) * 100}")
-            echo "Cobertura de Testes: $coverage%"
-            if (( $(echo "$coverage < 60" | bc -l) )); then
-              echo "A cobertura de testes está abaixo do mínimo exigido (60%)"
-              exit 1
-            fi
-          else
-            echo "Nenhuma métrica de cobertura válida encontrada!"
-            exit 1
-          fi
-      

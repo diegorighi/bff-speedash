@@ -1,0 +1,2 @@
+env:
+  MIN_COVERAGE: 60  # Definir a cobertura mínima de testes (pode ser ajustada depois)
