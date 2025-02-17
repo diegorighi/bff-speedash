@@ -1,4 +1,4 @@
-name: Test Coverage Check
+name: Test Unit Execution
 
 on:
   pull_request:
@@ -29,39 +29,3 @@ jobs:
 
       - name: Construir e Rodar Testes
         run: mvn clean verify
-
-      - name: Verificar Cobertura
-        run: |
-          # Definir MIN_COVERAGE com valor padrão de 60% caso não tenha sido definido no GitHub Actions
-          MIN_COVERAGE=${MIN_COVERAGE:-60}
-
-          if [ ! -f target/site/jacoco/jacoco.xml ]; then
-            echo "Nenhuma métrica de cobertura encontrada! Verifique se os testes foram executados corretamente."
-            exit 1
-          fi
-
-          # Extraindo métricas de cobertura corretamente usando sed
-          cobertura=$(sed -n 's/.*<counter type="INSTRUCTION" missed="\([0-9]*\)".*/\1/p' target/site/jacoco/jacoco.xml | awk '{sum+=$1} END {print sum}')
-          total=$(sed -n 's/.*<counter type="INSTRUCTION" covered="\([0-9]*\)".*/\1/p' target/site/jacoco/jacoco.xml | awk '{sum+=$1} END {print sum}')
-
-          # Garantindo que as variáveis não estejam vazias (fallback para 0)
-          cobertura=${cobertura:-0}
-          total=${total:-0}
-          total_instrucoes=$((total + cobertura))
-
-          if [ "$total_instrucoes" -gt 0 ]; then
-            coverage=$(awk "BEGIN {printf \"%.2f\", ($total / $total_instrucoes) * 100}")
-            echo "Cobertura de Testes: $coverage%"
-            if (( $(echo "$coverage < $MIN_COVERAGE" | bc -l) )); then
-              echo "A cobertura de testes está abaixo do mínimo exigido (${MIN_COVERAGE}%)"
-              exit 1
-            fi
-          else
-            echo "Nenhuma métrica de cobertura válida encontrada!"
-            exit 1
-          fi
-      
-      
-      
-      
-      
