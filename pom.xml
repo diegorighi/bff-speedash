@@ -16,6 +16,9 @@
 
 
     <properties>
+
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <java.version>17</java.version>
         <spring-cloud.version>2024.0.0</spring-cloud.version>
     </properties>
@@ -105,18 +108,15 @@
         </dependency>
 
 
-
     </dependencies>
-
 
 
     <build>
         <plugins>
-            <!-- Plugin Jacoco para cobertura de testes -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.10</version> <!-- Use a versão mais recente -->
+                <version>0.8.11</version>
                 <executions>
                     <execution>
                         <goals>
@@ -131,11 +131,13 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- Ignorar classes sensíveis do JDK -->
+                    <excludes>
+                        <exclude>com/sun/**</exclude>
+                        <exclude>jdk/**</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
