@@ -16,6 +16,9 @@
 
 
     <properties>
+
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <java.version>17</java.version>
         <spring-cloud.version>2024.0.0</spring-cloud.version>
     </properties>
@@ -105,36 +108,17 @@
         </dependency>
 
 
-
     </dependencies>
-
 
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.1.2</version>
-                <configuration>
-                    <argLine>-javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</argLine>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.mockito</groupId>
-                        <artifactId>mockito-core</artifactId>
-                        <version>5.5.0</version> <!-- Certifique-se de usar uma versão atualizada -->
-                    </dependency>
-                </dependencies>
-            </plugin>
-
-            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.10</version>
+                <version>0.8.11</version>
                 <executions>
                     <execution>
-                        <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
@@ -147,10 +131,16 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <!-- Ignorar classes sensíveis do JDK -->
+                    <excludes>
+                        <exclude>com/sun/**</exclude>
+                        <exclude>jdk/**</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
-
-
         </plugins>
     </build>
+
 
 </project>
