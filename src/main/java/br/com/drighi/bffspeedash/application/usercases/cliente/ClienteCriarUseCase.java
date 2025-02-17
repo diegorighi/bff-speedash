@@ -34,6 +34,10 @@ public class ClienteCriarUseCase {
      * @throws IllegalArgumentException Se os dados fornecidos forem inválidos.
      */
     public ClienteDTO criarCliente(ClienteDTO clienteDTO) {
+        if (clienteDTO == null) {
+            throw new IllegalArgumentException("O argumento ClienteDTO não pode ser nulo");
+        }
+
         // Valida o DTO antes de realizar qualquer operação
         validarCliente(clienteDTO);
 
