@@ -1,0 +1,47 @@
+name: Test Coverage Check
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do Código
+        uses: actions/checkout@v3
+
+      - name: Configurar o JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Configurar Cache do Maven
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: maven-${{ runner.os }}-
+
+      - name: Construir e Rodar Testes
+        run: mvn clean verify
+
+      - name: Verificar Cobertura
+        run: |
+          cobertura=$(grep -oP '(?<=<counter type="INSTRUCTION" missed=")[0-9]+' target/site/jacoco/jacoco.xml | awk '{sum+=$1} END {print sum}')
+          total=$(grep -oP '(?<=<counter type="INSTRUCTION" covered=")[0-9]+' target/site/jacoco/jacoco.xml | awk '{sum+=$1} END {print sum}')
+          if [ $((total + cobertura)) -gt 0 ]; then
+            coverage=$(awk "BEGIN {printf \"%.2f\", ($total / ($total + $cobertura)) * 100}")
+            echo "Cobertura de Testes: $coverage%"
+            if (( $(echo "$coverage < 60" | bc -l) )); then
+              echo "A cobertura de testes está abaixo do mínimo exigido (60%)"
+              exit 1
+            fi
+          else
+            echo "Nenhuma métrica de cobertura encontrada!"
+            exit 1
+          fi
