@@ -1,12 +1,12 @@
 package br.com.drighi.bffspeedash.usecases;
 
-import br.com.drighi.bffspeedash.application.usercases.cliente.ClienteCriarUseCase;
+import br.com.drighi.bffspeedash.application.usecases.cliente.ClienteCriarUseCase;
 import br.com.drighi.bffspeedash.domain.model.cliente.*;
 import br.com.drighi.bffspeedash.domain.model.common.EnderecoDTO;
 import br.com.drighi.bffspeedash.domain.model.common.EnumEstado;
 import br.com.drighi.bffspeedash.domain.model.common.EnumOrgaoEmissor;
 import br.com.drighi.bffspeedash.domain.model.common.EnumTipoDocumento;
-import br.com.drighi.bffspeedash.domain.port.output.ClientePort;
+import br.com.drighi.bffspeedash.application.port.out.OutboundOpenFeignPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 class ClienteCriarUseCaseTest {
 
     @Mock
-    private ClientePort clientePort;
+    private OutboundOpenFeignPort clientePort;
 
     @InjectMocks
     private ClienteCriarUseCase clienteCriarUseCase;
