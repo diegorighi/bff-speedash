@@ -1,11 +1,10 @@
 package br.com.drighi.bffspeedash.infrastructure.adapters.in.services;
 
 import br.com.drighi.bffspeedash.application.port.in.InboundClienteHttpRest;
-import br.com.drighi.bffspeedash.domain.model.cliente.*;
-import br.com.drighi.bffspeedash.domain.model.common.EnderecoDTO;
-import br.com.drighi.bffspeedash.domain.model.common.EnumEstado;
-import br.com.drighi.bffspeedash.domain.model.common.EnumOrgaoEmissor;
-import br.com.drighi.bffspeedash.domain.model.common.EnumTipoDocumento;
+import br.com.drighi.bffspeedash.domain.model.cliente.ClienteDTO;
+import br.com.drighi.bffspeedash.infrastructure.adapters.out.http.ClienteFeignClient;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,7 +12,30 @@ import java.util.Optional;
 
 @Service
 public class ClienteService implements InboundClienteHttpRest {
-    
+
+    private final ClienteFeignClient clienteFeignClient;
+    private final REDISClienteService redisClienteService;
+
+    private final RedisTemplate<String, Object> redisTemplate;
+    private static final String CACHE_PREFIX = "cliente:cpf:";
+
+    public ClienteService(
+            ClienteFeignClient clienteFeignClient,
+            RedisTemplate<String, Object> redisTemplate,
+            REDISClienteService redisClienteService
+    ) {
+        this.clienteFeignClient = clienteFeignClient;
+        this.redisTemplate = redisTemplate;
+        this.redisClienteService = redisClienteService;
+    }
+
+
+
+
+    public void salvarNoREDIS(ClienteDTO cliente){
+        redisClienteService.salvarNoCache(cliente);
+    }
+
     @Override
     public List<ClienteDTO> listaClientes() {
         return List.of();
@@ -21,49 +43,29 @@ public class ClienteService implements InboundClienteHttpRest {
 
     @Override
     public Optional<ClienteDTO> buscaClientePorCPF(String cpf) {
-        ClienteDTO clienteDTO = new ClienteDTO(
-                new PessoaDTO(
-                        "João", // primeiroNome
-                        "Silva", // nomeDoMeio
-                        "Santos", // sobrenome
-                        "1990-01-01", // dataNascimento
-                        EnumSexo.M // sexo
-                ),
-                List.of(
-                        new DocumentoDTO(
-                                EnumTipoDocumento.CPF, // tipoDocumento
-                                "123.456.789-00", // numeroDocumento
-                                EnumOrgaoEmissor.SSP, // orgaoEmissor
-                                EnumEstado.SP, // estadoEmissor
-                                "2020-01-01", // dataEmissao
-                                "2030-01-01" // dataValidade
-                        )
-                ),
-                List.of(
-                        new ContatoDTO(
-                                EnumTipoContato.CELULAR, // tipo
-                                "(11) 91234-5678" // descritivo
-                        )
-                ),
-                new EnderecoDTO(
-                        "Rua das Flores", // logradouro
-                        100, // numero
-                        "Apto 102", // complemento
-                        "Jardim das Palmeiras", // bairro
-                        "12345-678", // cep
-                        "São Paulo", // cidade
-                        EnumEstado.SP// estado
-                )
-        );
+        String cacheKey = CACHE_PREFIX + cpf;
 
-        for(DocumentoDTO numDoc : clienteDTO.listaDocumentos()){
-            if(numDoc.numeroDocumento().equals(cpf)){
-                return  Optional.of(clienteDTO);
-            }else {
+        // Recupera o objeto do Redis (JSON) e força a deserialização para ClienteDTO
+        Object cachedObject = redisTemplate.opsForValue().get(cacheKey);
 
-                return Optional.empty();
-            }
+        if (cachedObject != null) {
+            ClienteDTO cliente = new ObjectMapper().convertValue(cachedObject, ClienteDTO.class);
+            // Salvar novamente no cache apenas como precaução
+            this.salvarNoREDIS(cliente);
+            return Optional.of(cliente);
         }
+
+
+        // 2️⃣ Se não estiver no cache, busca via Feign Client no CORE
+        //Optional<ClienteDTO> cliente = Optional.ofNullable(clienteFeignClient.buscarClientePorCPF(cpf));
+
+        // 3️⃣ Se encontrou, armazena no cache com expiração de 10 minutos
+        //cliente.ifPresent(this::salvarNoREDIS);
+
         return null;
     }
+
+
+
 }
+
